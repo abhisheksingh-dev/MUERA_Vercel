@@ -5,15 +5,23 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
 type PaymentMethod = "card" | "twint" | "invoice";
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const { items, subtotal, clearCart } = useCart();
   const router = useRouter();
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const stripe = useStripe();
+  const elements = useElements();
 
   useEffect(() => {
     if (items.length === 0) router.push("/shop");
@@ -24,9 +32,84 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!stripe || !elements) return;
+
     setSubmitting(true);
-    // Simulate payment processing
-    await new Promise((r) => setTimeout(r, 1800));
+    setErrorMessage(null);
+
+    if (paymentMethod === "card") {
+      const cardElement = elements.getElement(CardElement);
+      if (cardElement) {
+        const { error, paymentMethod: stripePaymentMethod } = await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement,
+          billing_details: {
+            name: (document.getElementById("co-first-name") as HTMLInputElement)?.value + " " + (document.getElementById("co-last-name") as HTMLInputElement)?.value,
+            email: (document.getElementById("co-email") as HTMLInputElement)?.value,
+          },
+        });
+
+        if (error) {
+          setErrorMessage(error.message || "An error occurred with your payment.");
+          setSubmitting(false);
+          return;
+        }
+        
+        console.log("Payment successful, method ID:", stripePaymentMethod.id);
+        
+        // Save order to backend
+        try {
+          await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              total_amount: total,
+              status: 'paid',
+              payment_method: 'card',
+              stripe_payment_id: stripePaymentMethod.id,
+              items: items,
+              shipping_address: {
+                name: (document.getElementById("co-first-name") as HTMLInputElement)?.value + " " + (document.getElementById("co-last-name") as HTMLInputElement)?.value,
+                email: (document.getElementById("co-email") as HTMLInputElement)?.value,
+                address: (document.getElementById("co-address") as HTMLInputElement)?.value,
+                city: (document.getElementById("co-city") as HTMLInputElement)?.value,
+                postal: (document.getElementById("co-postal") as HTMLInputElement)?.value,
+                country: (document.getElementById("co-country") as HTMLSelectElement)?.value,
+              }
+            })
+          });
+        } catch (e) {
+          console.error("Failed to save order", e);
+        }
+      }
+    } else {
+      await new Promise((r) => setTimeout(r, 1800));
+      
+      // Save order to backend
+      try {
+        await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            total_amount: total,
+            status: 'pending',
+            payment_method: paymentMethod,
+            items: items,
+            shipping_address: {
+              name: (document.getElementById("co-first-name") as HTMLInputElement)?.value + " " + (document.getElementById("co-last-name") as HTMLInputElement)?.value,
+              email: (document.getElementById("co-email") as HTMLInputElement)?.value,
+              address: (document.getElementById("co-address") as HTMLInputElement)?.value,
+              city: (document.getElementById("co-city") as HTMLInputElement)?.value,
+              postal: (document.getElementById("co-postal") as HTMLInputElement)?.value,
+              country: (document.getElementById("co-country") as HTMLSelectElement)?.value,
+            }
+          })
+        });
+      } catch (e) {
+        console.error("Failed to save order", e);
+      }
+    }
+
     clearCart();
     router.push("/checkout/confirmation");
   };
@@ -115,20 +198,25 @@ export default function CheckoutPage() {
                   <label htmlFor="co-card-name" className="form-label">Name on card</label>
                   <input type="text" id="co-card-name" className="stripe-input" placeholder="Max Müller" required autoComplete="cc-name" />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="co-card-number" className="form-label">Card number</label>
-                  <input type="text" id="co-card-number" className="stripe-input" placeholder="4242 4242 4242 4242" maxLength={19} autoComplete="cc-number" />
+                <div className="form-group" style={{ padding: "12px", border: "1px solid var(--color-light-gray)", backgroundColor: "#fafafa" }}>
+                  <CardElement options={{
+                    style: {
+                      base: {
+                        fontSize: "16px",
+                        color: "#424770",
+                        "::placeholder": {
+                          color: "#aab7c4",
+                        },
+                      },
+                      invalid: {
+                        color: "#9e2146",
+                      },
+                    },
+                  }} />
                 </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="co-card-exp" className="form-label">Expiry</label>
-                    <input type="text" id="co-card-exp" className="stripe-input" placeholder="MM / YY" maxLength={7} autoComplete="cc-exp" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="co-card-cvc" className="form-label">CVC</label>
-                    <input type="text" id="co-card-cvc" className="stripe-input" placeholder="123" maxLength={4} autoComplete="cc-csc" />
-                  </div>
-                </div>
+                {errorMessage && (
+                  <div style={{ color: "#9e2146", fontSize: "0.875rem" }}>{errorMessage}</div>
+                )}
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.25rem" }}>
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--color-mid-gray)" strokeWidth="1.3" aria-hidden="true">
                     <rect x="2" y="5" width="10" height="7" rx="1" />
@@ -228,5 +316,13 @@ export default function CheckoutPage() {
         </aside>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Elements stripe={stripePromise}>
+      <CheckoutContent />
+    </Elements>
   );
 }

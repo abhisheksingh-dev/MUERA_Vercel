@@ -116,10 +116,8 @@ export default function ConfiguratorPage() {
               style={{ textAlign: "center", display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}
             >
               {/* Link to actual Mirrorsize configurator — update URL as needed */}
-              <a
-                href="https://mirrorsize.com"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/configurator/studio"
                 className="btn btn--primary-light"
                 id="configurator-start-btn"
               >
@@ -127,7 +125,7 @@ export default function ConfiguratorPage() {
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                   <path d="M2 7h10M7 2l5 5-5 5" />
                 </svg>
-              </a>
+              </Link>
               <Link href="/contact" className="btn btn--outline" id="configurator-contact-link">
                 Have a question?
               </Link>

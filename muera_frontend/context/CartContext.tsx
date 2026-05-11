@@ -10,6 +10,8 @@ export interface CartItem {
   selectedSize: string;
   quantity: number;
   customized: boolean; // ordered via 3D configurator
+  customPrice?: number;
+  customImage?: string;
   lineKey: string; // unique per product+color+size+customized
 }
 
@@ -100,7 +102,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [state, isHydrated]);
 
   const addItem = (item: Omit<CartItem, "lineKey">) => {
-    const lineKey = `${item.product.id}__${item.selectedColor}__${item.selectedSize}__${item.customized}`;
+    // Generate a unique line key based on product + config
+    const uniqueSuffix = item.customized ? `__${Date.now()}` : "";
+    const lineKey = `${item.product.id}__${item.selectedColor}__${item.selectedSize}__${item.customized}${uniqueSuffix}`;
     dispatch({ type: "ADD_ITEM", item: { ...item, lineKey } });
   };
 
@@ -109,7 +113,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = () => dispatch({ type: "CLEAR" });
 
   const totalItems = state.items.reduce((s, i) => s + i.quantity, 0);
-  const subtotal = state.items.reduce((s, i) => s + i.product.price * i.quantity, 0);
+  const subtotal = state.items.reduce((s, i) => {
+    const price = i.customPrice !== undefined ? i.customPrice : i.product.price;
+    return s + price * i.quantity;
+  }, 0);
 
   return (
     <CartContext.Provider value={{ ...state, addItem, removeItem, updateQty, clearCart, totalItems, subtotal }}>
