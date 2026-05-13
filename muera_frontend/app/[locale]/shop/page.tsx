@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { PRODUCTS, CATEGORIES, formatPrice, type ProductCategory } from "@/data/products";
 
 export default function ShopPage() {
   const [activeCategory, setActiveCategory] = useState<ProductCategory | "all">("all");
+  const t = useTranslations("shop");
 
   const filtered = activeCategory === "all"
     ? PRODUCTS
@@ -14,24 +16,21 @@ export default function ShopPage() {
 
   return (
     <>
-      {/* Hero */}
       <section className="shop-hero" aria-label="MUERA Shop">
         <div className="container">
-          <p className="section-label" style={{ color: "var(--color-gold)" }}>The Collection</p>
+          <p className="section-label" style={{ color: "var(--color-gold)" }}>{t("heroLabel")}</p>
           <h1 className="section-title section-title--light" style={{ maxWidth: 560 }}>
-            Shop
+            {t("heroTitle")}
           </h1>
           <div className="divider" style={{ background: "rgba(245,243,239,0.2)" }} />
           <p style={{ color: "rgba(245,243,239,0.6)", maxWidth: 480, fontSize: "1.0625rem" }}>
-            Premium made-to-measure suits and accessories. Select any suit to configure with our 3D tool.
+            {t("heroText")}
           </p>
         </div>
       </section>
 
-      {/* Filters + Grid */}
-      <section className="section" style={{ background: "var(--color-off-white)", paddingTop: "3rem" }} aria-label="Product catalogue">
+      <section className="section" style={{ background: "var(--color-off-white)", paddingTop: "3rem" }} aria-label={t("heroTitle")}>
         <div className="container">
-          {/* Filter bar */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
             <div className="category-filter" role="group" aria-label="Filter by category">
               {CATEGORIES.map(({ value, label }) => (
@@ -47,11 +46,10 @@ export default function ShopPage() {
               ))}
             </div>
             <p style={{ fontSize: "0.8125rem", color: "var(--color-mid-gray)" }}>
-              {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
+              {filtered.length} {filtered.length === 1 ? t("piece") : t("pieces")}
             </p>
           </div>
 
-          {/* Grid */}
           <div className="product-grid" aria-label="Products">
             {filtered.map((product) => (
               <Link
@@ -78,7 +76,7 @@ export default function ShopPage() {
                         <circle cx="5" cy="5" r="4" />
                         <path d="M3 5h4M5 3v4" />
                       </svg>
-                      3D Configurator
+                      {t("configuratorTag")}
                     </span>
                   )}
                 </div>
@@ -99,16 +97,15 @@ export default function ShopPage() {
         </div>
       </section>
 
-      {/* Configurator Banner */}
-      <section className="cta-banner" aria-label="3D Configurator">
+      <section className="cta-banner" aria-label={t("bannerTitle")}>
         <div className="container">
-          <p className="section-label" style={{ color: "var(--color-gold)", textAlign: "center" }}>Made-to-Measure</p>
-          <h2 className="cta-banner__title">Want something truly yours?</h2>
+          <p className="section-label" style={{ color: "var(--color-gold)", textAlign: "center" }}>{t("bannerLabel")}</p>
+          <h2 className="cta-banner__title">{t("bannerTitle")}</h2>
           <p className="cta-banner__text">
-            Skip the catalogue. Use our 3D configurator to design your suit from scratch.
+            {t("bannerText")}
           </p>
           <Link href="/configurator" className="btn btn--primary-light" id="shop-config-cta">
-            Open Configurator
+            {t("bannerCta")}
           </Link>
         </div>
       </section>

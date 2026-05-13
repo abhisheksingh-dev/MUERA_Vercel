@@ -4,10 +4,10 @@ import { useState, use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { getProductBySlug, getRelatedProducts, formatPrice } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 
-/* ── Simple Accordion ──────────────────────────────────────── */
 function Accordion({ title, children }: { title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
@@ -27,16 +27,15 @@ function Accordion({ title, children }: { title: string; children: React.ReactNo
   );
 }
 
-/* ── Toast ──────────────────────────────────────────────────── */
-function Toast({ visible }: { visible: boolean }) {
+function Toast({ visible, t }: { visible: boolean; t: (key: string) => string }) {
   if (!visible) return null;
   return (
     <div className="toast" role="status" aria-live="polite">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
         <path d="M3 9l4 4 8-8" />
       </svg>
-      <p className="toast__text">Added to cart</p>
-      <Link href="/cart" className="toast__link">View cart →</Link>
+      <p className="toast__text">{t("addedToCart")}</p>
+      <Link href="/cart" className="toast__link">{t("viewCart")}</Link>
     </div>
   );
 }
@@ -45,6 +44,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const { slug } = use(params);
   const product = getProductBySlug(slug);
   const { addItem } = useCart();
+  const t = useTranslations("product");
 
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -72,7 +72,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     <>
       <div className="container">
         <div className="pdp-grid">
-          {/* Gallery */}
           <div className="pdp-gallery">
             <div className="pdp-gallery__main">
               <Image
@@ -86,7 +85,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               {product.hasConfigurator && (
                 <div className="pdp-gallery__configurator-overlay">
                   <span style={{ color: "var(--color-gold)", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                    3D Customisable
+                    {t("customisable3d")}
                   </span>
                   <a
                     href={product.configuratorUrl}
@@ -95,18 +94,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                     className="btn btn--primary-light"
                     style={{ padding: "10px 18px", fontSize: "0.75rem" }}
                   >
-                    Customise →
+                    {t("customise")}
                   </a>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Info */}
           <div>
-            {/* Breadcrumb */}
             <nav className="pdp-info__breadcrumb" aria-label="Breadcrumb">
-              <Link href="/shop">Shop</Link>
+              <Link href="/shop">{t("breadcrumbShop")}</Link>
               <span aria-hidden="true">›</span>
               <Link href={`/shop?category=${product.category}`}>{product.category}</Link>
               <span aria-hidden="true">›</span>
@@ -136,16 +133,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 <circle cx="3.5" cy="12" r="1" />
                 <circle cx="10.5" cy="12" r="1" />
               </svg>
-              Delivery: {product.deliveryTime}
+              {t("delivery", { time: product.deliveryTime })}
             </p>
 
             <div className="divider" />
 
-            {/* Color */}
             <p className="pdp-selector-label">
-              Colour <span>— {product.variants[selectedColor].color}</span>
+              {t("colour")} <span>— {product.variants[selectedColor].color}</span>
             </p>
-            <div className="pdp-swatches" role="radiogroup" aria-label="Select colour">
+            <div className="pdp-swatches" role="radiogroup" aria-label={t("colour")}>
               {product.variants.map((v, i) => (
                 <button
                   key={v.color}
@@ -159,17 +155,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               ))}
             </div>
 
-            {/* Size */}
             <p className="pdp-selector-label" style={sizeError ? { color: "#c0392b" } : {}}>
-              Size {sizeError && <span style={{ color: "#c0392b" }}>— Please select a size</span>}
+              {t("size")} {sizeError && <span style={{ color: "#c0392b" }}>— {t("sizeError")}</span>}
             </p>
-            <div className="pdp-sizes" role="radiogroup" aria-label="Select size">
+            <div className="pdp-sizes" role="radiogroup" aria-label={t("size")}>
               {product.sizes.map((size) => (
                 <button
                   key={size}
                   className={`pdp-size-btn${selectedSize === size ? " pdp-size-btn--active" : ""}`}
                   onClick={() => setSelectedSize(size)}
-                  aria-label={`Size ${size}`}
+                  aria-label={t("sizeLabel", { size })}
                   aria-pressed={selectedSize === size}
                 >
                   {size}
@@ -177,17 +172,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               ))}
             </div>
 
-            {/* CTAs */}
             <div className="pdp-cta-row">
               <button className="btn btn--primary" id="pdp-add-to-cart" onClick={handleAddToCart}>
-                Add to Cart
+                {t("addToCart")}
               </button>
               <Link href="/checkout" className="btn btn--outline-dark" id="pdp-buy-now">
-                Buy Now
+                {t("buyNow")}
               </Link>
             </div>
 
-            {/* Configurator upsell */}
             {product.hasConfigurator && (
               <div className="pdp-configurator-card">
                 <div className="pdp-configurator-card__icon">
@@ -197,9 +190,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                   </svg>
                 </div>
                 <div>
-                  <h3 className="pdp-configurator-card__title">Customise with 3D Configurator</h3>
+                  <h3 className="pdp-configurator-card__title">{t("configuratorCardTitle")}</h3>
                   <p className="pdp-configurator-card__text">
-                    Choose your exact fabric, lapel shape, lining, buttons and more — fully visualised in 3D before you order.
+                    {t("configuratorCardText")}
                   </p>
                   <a
                     href={product.configuratorUrl}
@@ -208,7 +201,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                     className="pdp-configurator-card__link"
                     id="pdp-configurator-link"
                   >
-                    Open 3D Configurator
+                    {t("open3dConfigurator")}
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                       <path d="M2 6h8M6 2l4 4-4 4" />
                     </svg>
@@ -217,42 +210,37 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               </div>
             )}
 
-            {/* Accordion */}
             <div className="pdp-accordion">
-              <Accordion title="Product Details">
+              <Accordion title={t("productDetails")}>
                 <ul>
                   {product.details.map((d) => <li key={d}>{d}</li>)}
                 </ul>
               </Accordion>
               {product.fabricInfo && (
-                <Accordion title="Fabric & Material">
+                <Accordion title={t("fabricMaterial")}>
                   <p>{product.fabricInfo}</p>
                 </Accordion>
               )}
               {product.careInstructions && (
-                <Accordion title="Care Instructions">
+                <Accordion title={t("careInstructions")}>
                   <ul>
                     {product.careInstructions.map((c) => <li key={c}>{c}</li>)}
                   </ul>
                 </Accordion>
               )}
-              <Accordion title="Delivery & Returns">
-                <p>
-                  Made-to-order items: {product.deliveryTime}. Standard items ship within 5–7 business days.
-                  Returns accepted within 14 days of delivery on unaltered items. Made-to-measure garments are non-refundable but we will always work to get the fit right.
-                </p>
+              <Accordion title={t("deliveryReturns")}>
+                <p>{t("deliveryReturnsText", { deliveryTime: product.deliveryTime })}</p>
               </Accordion>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Related products */}
       {related.length > 0 && (
-        <section className="section" style={{ background: "var(--color-off-white)", paddingTop: "3rem" }} aria-label="You may also like">
+        <section className="section" style={{ background: "var(--color-off-white)", paddingTop: "3rem" }} aria-label={t("relatedLabel")}>
           <div className="container">
-            <p className="section-label">You may also like</p>
-            <h2 className="section-title" style={{ marginBottom: "2rem" }}>Complete the look</h2>
+            <p className="section-label">{t("relatedLabel")}</p>
+            <h2 className="section-title" style={{ marginBottom: "2rem" }}>{t("relatedTitle")}</h2>
             <div className="related-grid">
               {related.map((rp) => (
                 <Link key={rp.id} href={`/shop/${rp.slug}`} className="product-card" id={`related-${rp.id}`}>
@@ -282,7 +270,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         </section>
       )}
 
-      <Toast visible={toast} />
+      <Toast visible={toast} t={t} />
     </>
   );
 }

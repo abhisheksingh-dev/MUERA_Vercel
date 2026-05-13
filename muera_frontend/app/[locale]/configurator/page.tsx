@@ -1,28 +1,29 @@
-import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Configurator",
-  description:
-    "Configure your MUERA made-to-measure suit. Choose your fabric, fit and details — then get measured and receive your perfect suit.",
-};
+export default async function ConfiguratorPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "configurator" });
+  const commonT = await getTranslations({ locale, namespace: "common" });
 
-const STEPS = [
-  { num: "01", label: "Choose fabric & style" },
-  { num: "02", label: "Select your fit" },
-  { num: "03", label: "Submit measurements" },
-  { num: "04", label: "Receive your suit" },
-];
+  const STEPS = [
+    { num: "01", label: t("step1") },
+    { num: "02", label: t("step2") },
+    { num: "03", label: t("step3") },
+    { num: "04", label: t("step4") },
+  ];
 
-export default function ConfiguratorPage() {
   return (
     <>
-      {/* ── CONFIGURATOR HERO ─────────────────────── */}
-      <section className="config-hero" aria-label="Start the MUERA configurator">
+      <section className="config-hero" aria-label={t("heroTitle")}>
         <Image
           src="/fabric-texture.png"
-          alt="Premium fabric texture background"
+          alt=""
           fill
           priority
           loading="eager"
@@ -37,7 +38,7 @@ export default function ConfiguratorPage() {
               className="section-label animate-fade-up animate-delay-1"
               style={{ color: "var(--color-gold)", textAlign: "center" }}
             >
-              Made-to-Measure
+              {t("heroLabel")}
             </p>
             <h1
               className="animate-fade-up animate-delay-2"
@@ -48,9 +49,8 @@ export default function ConfiguratorPage() {
                 textAlign: "center",
                 marginBottom: "1.25rem",
               }}
-            >
-              Your suit,<br />configured.
-            </h1>
+              dangerouslySetInnerHTML={{ __html: t.raw("heroTitle") }}
+            />
             <div className="divider divider--center animate-fade-up animate-delay-3" style={{ background: "rgba(198,169,107,0.5)" }} />
             <p
               className="animate-fade-up animate-delay-3"
@@ -62,11 +62,9 @@ export default function ConfiguratorPage() {
                 lineHeight: 1.65,
               }}
             >
-              You will be redirected to our external configurator,
-              powered by Mirrorsize 3D technology.
+              {t("heroText")}
             </p>
 
-            {/* Steps preview */}
             <div
               className="animate-fade-up animate-delay-4"
               style={{
@@ -115,19 +113,18 @@ export default function ConfiguratorPage() {
               className="animate-fade-up animate-delay-5"
               style={{ textAlign: "center", display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}
             >
-              {/* Link to actual Mirrorsize configurator — update URL as needed */}
               <Link
                 href="/configurator/studio"
                 className="btn btn--primary-light"
                 id="configurator-start-btn"
               >
-                Start Configuration
+                {t("startCta")}
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                   <path d="M2 7h10M7 2l5 5-5 5" />
                 </svg>
               </Link>
               <Link href="/contact" className="btn btn--outline" id="configurator-contact-link">
-                Have a question?
+                {t("questionLink")}
               </Link>
             </div>
 
@@ -140,30 +137,27 @@ export default function ConfiguratorPage() {
                 letterSpacing: "0.05em",
               }}
             >
-              Powered by Mirrorsize 3D Configurator &nbsp;·&nbsp; Mueller Bespoke
+              {commonT("poweredBy")}
             </p>
           </div>
         </div>
       </section>
 
-      {/* ── REASSURANCE ──────────────────────────── */}
       <section
         className="section"
         style={{ background: "var(--color-off-white)", paddingBlock: "80px" }}
-        aria-label="Process reassurance"
+        aria-label={t("reassuranceLabel")}
       >
         <div className="container" style={{ textAlign: "center" }}>
-          <p className="section-label">What to expect</p>
+          <p className="section-label">{t("reassuranceLabel")}</p>
           <h2 className="section-title" style={{ marginBottom: "1rem", fontSize: "clamp(1.5rem, 3vw, 2.25rem)" }}>
-            Simple, transparent, precise
+            {t("reassuranceTitle")}
           </h2>
           <p style={{ maxWidth: 480, marginInline: "auto", marginBottom: "2.5rem" }}>
-            The configurator guides you through fabric, fit and style choices.
-            Once complete, we guide you through measurement — then your suit is
-            crafted and delivered within a few weeks.
+            {t("reassuranceText")}
           </p>
           <Link href="/contact" className="btn btn--outline-dark" id="config-reassure-contact">
-            Any questions? Contact us
+            {t("reassuranceCta")}
           </Link>
         </div>
       </section>

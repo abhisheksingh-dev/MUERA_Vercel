@@ -3,10 +3,13 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const userSessionId = searchParams.get("userSessionId");
+  const t = useTranslations("configuratorSuccess");
+  const commonT = useTranslations("common");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -27,15 +30,15 @@ function SuccessContent() {
           },
           body: JSON.stringify({ userSessionId }),
         });
-        
+
         const result = await res.json();
-        
+
         if (result.status === 1000) {
           setData(result.data);
         } else {
           setError(result.message || "Failed to fetch details.");
         }
-      } catch (err) {
+      } catch {
         setError("An error occurred while fetching details.");
       } finally {
         setLoading(false);
@@ -46,16 +49,16 @@ function SuccessContent() {
   }, [userSessionId]);
 
   if (loading) {
-    return <div style={{ padding: "4rem", textAlign: "center" }}>Loading your configuration...</div>;
+    return <div style={{ padding: "4rem", textAlign: "center" }}>{t("loading")}</div>;
   }
 
   if (error || !userSessionId) {
     return (
       <div style={{ padding: "4rem", textAlign: "center" }}>
-        <h2>We couldn't retrieve your configuration</h2>
-        <p>{error || "No session ID provided."}</p>
+        <h2>{t("errorTitle")}</h2>
+        <p>{error || t("errorNoSession")}</p>
         <Link href="/configurator" className="btn btn--outline" style={{ marginTop: "1rem" }}>
-          Try Again
+          {commonT("tryAgain")}
         </Link>
       </div>
     );
@@ -64,32 +67,32 @@ function SuccessContent() {
   return (
     <div style={{ padding: "4rem", maxWidth: "800px", margin: "0 auto" }}>
       <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "2rem", marginBottom: "2rem" }}>
-        Configuration Complete
+        {t("successTitle")}
       </h1>
-      
+
       {data && (
         <div style={{ background: "white", padding: "2rem", borderRadius: "8px", color: "#333" }}>
           <h2>{data.apparelName}</h2>
-          <p><strong>SKU:</strong> {data.sku}</p>
-          
-          <h3 style={{ marginTop: "2rem", marginBottom: "1rem" }}>Pieces</h3>
+          <p><strong>{t("sku", { sku: data.sku })}</strong></p>
+
+          <h3 style={{ marginTop: "2rem", marginBottom: "1rem" }}>{t("pieces")}</h3>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {data.pieces?.map((piece: any, idx: number) => (
             <div key={idx} style={{ marginBottom: "2rem", padding: "1rem", border: "1px solid #eaeaea" }}>
               <h4>{piece.pieceName}</h4>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {piece.image && <img src={piece.image} alt={piece.pieceName} style={{ maxWidth: "200px" }} />}
-              <p><strong>Fabric:</strong> {piece.fabrics?.fabricName}</p>
-              
-              <h5 style={{ marginTop: "1rem" }}>Style Choices</h5>
+              <p><strong>{t("fabric")}:</strong> {piece.fabrics?.fabricName}</p>
+
+              <h5 style={{ marginTop: "1rem" }}>{t("styleChoices")}</h5>
               <ul style={{ paddingLeft: "1.5rem" }}>
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {piece.styleChoices?.map((choice: any, cIdx: number) => (
                   <li key={cIdx}>{choice.attributeName}: {choice.styleName}</li>
                 ))}
               </ul>
-              
-              <h5 style={{ marginTop: "1rem" }}>Measurements</h5>
+
+              <h5 style={{ marginTop: "1rem" }}>{t("measurements")}</h5>
               <ul style={{ paddingLeft: "1.5rem" }}>
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {piece.measurements?.map((measure: any, mIdx: number) => (
@@ -98,13 +101,13 @@ function SuccessContent() {
               </ul>
             </div>
           ))}
-          
+
           <div style={{ marginTop: "2rem", display: "flex", gap: "1rem" }}>
             <Link href="/cart" className="btn btn--primary">
-              Add to Cart
+              {t("addToCart")}
             </Link>
             <Link href="/configurator" className="btn btn--outline-dark">
-              Configure Another
+              {commonT("configureAnother")}
             </Link>
           </div>
         </div>

@@ -1,14 +1,9 @@
-import type { Metadata } from "next";
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
-export const metadata: Metadata = {
-  title: "MUERA — Perfect Fit. Without Complexity.",
-  description:
-    "MUERA by Mueller Bespoke. Made-to-measure suits, configured online and crafted with precision. Premium fabrics and transparent pricing.",
-};
-
-/* ── SVG Icons ─────────────────────────────────────────────── */
 function IconFabric() {
   return (
     <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true">
@@ -62,60 +57,62 @@ function IconPrice() {
   );
 }
 
-const PROCESS_STEPS = [
-  {
-    num: "01",
-    icon: <IconFabric />,
-    title: "Configure",
-    text: "Choose your fabric, fit and details online.",
-  },
-  {
-    num: "02",
-    icon: <IconMeasure />,
-    title: "Measure",
-    text: "Get measured via partner or guided instructions.",
-  },
-  {
-    num: "03",
-    icon: <IconDeliver />,
-    title: "Receive",
-    text: "Your suit is crafted and delivered within weeks.",
-  },
-];
-
-const VALUE_ITEMS = [
-  "Perfect fit without tailoring complexity",
-  "Premium fabrics and precise craftsmanship",
-  "Transparent pricing — no surprises",
-  "Crafted by Mueller Bespoke",
-];
-
-const TRUST_CARDS = [
-  {
-    icon: <IconFit />,
-    title: "Perfect fit without complexity",
-    text: "Our digital process ensures a precise fit without the traditional friction.",
-  },
-  {
-    icon: <IconFabricSmall />,
-    title: "Premium fabrics & craftsmanship",
-    text: "Only the finest materials, selected and crafted with uncompromising standards.",
-  },
-  {
-    icon: <IconPrice />,
-    title: "Transparent pricing",
-    text: "No hidden costs. You know exactly what you pay for before you commit.",
-  },
-];
-
 export default function HomePage() {
+  const t = useTranslations("home");
+  const commonT = useTranslations("common");
+
+  const PROCESS_STEPS = [
+    {
+      num: "01",
+      icon: <IconFabric />,
+      title: t("processStep1Title"),
+      text: t("processStep1Text"),
+    },
+    {
+      num: "02",
+      icon: <IconMeasure />,
+      title: t("processStep2Title"),
+      text: t("processStep2Text"),
+    },
+    {
+      num: "03",
+      icon: <IconDeliver />,
+      title: t("processStep3Title"),
+      text: t("processStep3Text"),
+    },
+  ];
+
+  const VALUE_ITEMS = [
+    t("valueItem1"),
+    t("valueItem2"),
+    t("valueItem3"),
+    t("valueItem4"),
+  ];
+
+  const TRUST_CARDS = [
+    {
+      icon: <IconFit />,
+      title: t("trustCard1Title"),
+      text: t("trustCard1Text"),
+    },
+    {
+      icon: <IconFabricSmall />,
+      title: t("trustCard2Title"),
+      text: t("trustCard2Text"),
+    },
+    {
+      icon: <IconPrice />,
+      title: t("trustCard3Title"),
+      text: t("trustCard3Text"),
+    },
+  ];
+
   return (
     <>
-      {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="hero" aria-label="Hero — Perfect fit. Without complexity.">
+      <section className="hero" aria-label={t("heroTitle")}>
         <Image
           src="/hero-suit.png"
-          alt="Man in a perfectly tailored MUERA suit"
+          alt={t("heroImageAlt")}
           fill
           priority
           sizes="100vw"
@@ -126,23 +123,23 @@ export default function HomePage() {
         <div className="container" style={{ width: "100%" }}>
           <div className="hero__content">
             <p className="hero__eyebrow animate-fade-up animate-delay-1">
-              MUERA by Mueller Bespoke
+              {t("heroEyebrow")}
             </p>
-            <h1 className="hero__title animate-fade-up animate-delay-2">
-              Perfect fit.<br />Without complexity.
-            </h1>
+            <h1 className="hero__title animate-fade-up animate-delay-2"
+              dangerouslySetInnerHTML={{ __html: t.raw("heroTitle") }}
+            />
             <p className="hero__sub animate-fade-up animate-delay-3">
-              Made-to-measure suits, configured online and crafted with precision.
+              {t("heroSub")}
             </p>
             <p className="hero__brand animate-fade-up animate-delay-4">
-              MUERA&nbsp;&nbsp;—&nbsp;&nbsp;Mueller Bespoke
+              {commonT("mueraFull")}
             </p>
             <div className="hero__ctas animate-fade-up animate-delay-5">
               <Link href="/configurator" className="btn btn--primary-light" id="hero-cta-primary">
-                Create Your Suit
+                {t("heroCtaPrimary")}
               </Link>
               <a href="#process" className="btn btn--outline" id="hero-cta-secondary">
-                How it works
+                {t("heroCtaSecondary")}
               </a>
             </div>
           </div>
@@ -155,11 +152,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── PROCESS ──────────────────────────────────────── */}
-      <section id="process" className="section" style={{ background: "var(--color-off-white)" }} aria-label="Three-step process">
+      <section id="process" className="section" style={{ background: "var(--color-off-white)" }} aria-label={t("processTitle")}>
         <div className="container" style={{ textAlign: "center" }}>
-          <p className="section-label">The process</p>
-          <h2 className="section-title">Your suit in three steps</h2>
+          <p className="section-label">{t("processLabel")}</p>
+          <h2 className="section-title">{t("processTitle")}</h2>
           <div className="divider divider--center" />
         </div>
 
@@ -177,30 +173,29 @@ export default function HomePage() {
 
           <div style={{ textAlign: "center", marginTop: "3.5rem" }}>
             <Link href="/configurator" className="btn btn--outline-dark" id="process-cta">
-              Create Your Suit
+              {t("heroCtaPrimary")}
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── VALUE PROPOSITION ────────────────────────────── */}
-      <section className="section value-section" aria-label="Why MUERA">
+      <section className="section value-section" aria-label={t("valueLabel")}>
         <div className="container">
           <div className="value-grid">
             <div>
-              <p className="section-label" style={{ color: "var(--color-gold)" }}>Why MUERA</p>
+              <p className="section-label" style={{ color: "var(--color-gold)" }}>{t("valueLabel")}</p>
               <h2 className="section-title section-title--light">
-                Precision without compromise
+                {t("valueTitle")}
               </h2>
               <div className="divider" style={{ background: "rgba(245,243,239,0.2)" }} />
-              <ul className="value-list" aria-label="Value propositions">
+              <ul className="value-list" aria-label={t("valueLabel")}>
                 {VALUE_ITEMS.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
               <div style={{ marginTop: "2.5rem" }}>
                 <Link href="/configurator" className="btn btn--primary-light" id="value-cta">
-                  Create Your Suit
+                  {commonT("createYourSuit")}
                 </Link>
               </div>
             </div>
@@ -208,29 +203,27 @@ export default function HomePage() {
             <div className="value-img-wrap">
               <Image
                 src="/suit-label.png"
-                alt="MUERA by Mueller Bespoke — suit interior label"
+                alt={t("valueImageAlt")}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 style={{ objectFit: "cover" }}
               />
               <div className="value-img-badge">
-                Mueller Bespoke
-                <span>crafted in Switzerland</span>
+                {t("valueBadge")}
+                <span>{t("valueBadgeSub")}</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── TRUST SECTION ─────────────────────────────────── */}
-      <section className="section trust-section" aria-label="Craft meets precision">
+      <section className="section trust-section" aria-label={t("trustTitle")}>
         <div className="container" style={{ textAlign: "center" }}>
-          <p className="section-label">Our commitment</p>
-          <h2 className="section-title">Craft meets precision</h2>
+          <p className="section-label">{t("trustLabel")}</p>
+          <h2 className="section-title">{t("trustTitle")}</h2>
           <div className="divider divider--center" />
           <p style={{ maxWidth: 540, marginInline: "auto", marginTop: "0.5rem" }}>
-            Behind MUERA stands Mueller Bespoke — combining traditional tailoring
-            expertise with a modern digital experience.
+            {t("trustDesc")}
           </p>
         </div>
 
@@ -247,18 +240,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CTA BANNER ───────────────────────────────────── */}
-      <section className="cta-banner" aria-label="Start your suit">
+      <section className="cta-banner" aria-label={t("ctaTitle")}>
         <div className="container">
           <p className="section-label" style={{ color: "var(--color-gold)", textAlign: "center" }}>
-            Begin
+            {t("ctaLabel")}
           </p>
-          <h2 className="cta-banner__title">Start your suit</h2>
+          <h2 className="cta-banner__title">{t("ctaTitle")}</h2>
           <p className="cta-banner__text">
-            Create your personalized suit in minutes.
+            {t("ctaText")}
           </p>
           <Link href="/configurator" className="btn btn--primary-light" id="final-cta">
-            Create Your Suit
+            {commonT("createYourSuit")}
           </Link>
         </div>
       </section>

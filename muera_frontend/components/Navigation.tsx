@@ -1,22 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useCart } from "@/context/CartContext";
-
-const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Shop", href: "/shop" },
-  { label: "Journal", href: "/blog" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-  { label: "Configurator", href: "/configurator" },
-];
+import Link from "next/link";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 function CartIcon({ count }: { count: number }) {
+  const t = useTranslations("nav");
   return (
-    <Link href="/cart" className="nav__cart" aria-label={`Cart — ${count} item${count !== 1 ? "s" : ""}`} id="nav-cart">
+    <Link href="/cart" className="nav__cart" aria-label={t("cart", { count })} id="nav-cart">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
         <path d="M2 2h2l2.4 10.4A1 1 0 007.4 14h7.2a1 1 0 001-.76L17 6H5" />
         <circle cx="8" cy="17" r="1" />
@@ -32,6 +26,17 @@ export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { totalItems } = useCart();
+  const t = useTranslations("nav");
+  const commonT = useTranslations("common");
+
+  const NAV_LINKS = [
+    { label: t("home"), href: "/" },
+    { label: t("shop"), href: "/shop" },
+    { label: t("journal"), href: "/blog" },
+    { label: t("about"), href: "/about" },
+    { label: t("contact"), href: "/contact" },
+    { label: t("configurator"), href: "/configurator" },
+  ];
 
   const isLightPage = pathname !== "/" && pathname !== "/configurator";
 
@@ -50,8 +55,8 @@ export default function Navigation() {
 
   return (
     <header>
-      <nav className={navClass} aria-label="Primary navigation">
-        <Link href="/" className="nav__logo" aria-label="MUERA — Home">
+      <nav className={navClass} aria-label={t("primaryNav")}>
+        <Link href="/" className="nav__logo" aria-label={t("mueraHome")}>
           MUERA
         </Link>
 
@@ -67,13 +72,16 @@ export default function Navigation() {
               </Link>
             </li>
           ))}
+          <li className="nav__lang-desktop">
+            <LanguageSwitcher />
+          </li>
+          <li className="nav__lang-mobile">
+            <LanguageSwitcher />
+          </li>
           <li className="nav__actions">
-            {
-              !mobileOpen && <CartIcon count={totalItems} />
-            }
-
+            {!mobileOpen && <CartIcon count={totalItems} />}
             <Link href="/configurator" className="btn btn--nav-cta" id="nav-cta">
-              Create Your Suit
+              {commonT("createYourSuit")}
             </Link>
           </li>
         </ul>
@@ -83,7 +91,7 @@ export default function Navigation() {
           <button
             className="nav__mobile-toggle"
             onClick={() => setMobileOpen((v) => !v)}
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-label={mobileOpen ? t("closeMenu") : t("openMenu")}
             aria-expanded={mobileOpen}
             id="mobile-nav-toggle"
           >

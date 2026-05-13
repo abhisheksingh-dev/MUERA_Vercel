@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -9,9 +10,14 @@ export function generateStaticParams() {
   }));
 }
 
-export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
   const post = getBlogBySlug(slug);
+  const t = await getTranslations({ locale, namespace: "blog" });
 
   if (!post) {
     notFound();
@@ -22,7 +28,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   return (
     <>
       <article className="blog-post">
-        {/* Hero */}
         <header className="blog-post__hero" style={{ position: "relative", minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", paddingTop: "72px" }}>
           <div className="blog-post__hero-bg" style={{ position: "absolute", inset: 0, zIndex: 1 }}>
             <Image
@@ -39,20 +44,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <div className="container" style={{ position: "relative", zIndex: 2 }}>
             <div className="blog-post__header-content" style={{ maxWidth: "800px", margin: "0 auto" }}>
               <Link href="/blog" className="blog-post__back" style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-gold)", textDecoration: "none", display: "inline-block", marginBottom: "2rem" }}>
-                &larr; Back to Journal
+                {t("backToJournal")}
               </Link>
               <div className="blog-post__meta-hero animate-fade-up animate-delay-1" style={{ fontFamily: "var(--font-sans)", fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(245, 243, 239, 0.8)", marginBottom: "1.5rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
                 <span>{post.category}</span>
                 <span className="dot">&bull;</span>
-                <span>{new Date(post.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+                <span>{new Date(post.date).toLocaleDateString(locale === "de" ? "de-CH" : locale === "fr" ? "fr-CH" : locale === "it" ? "it-CH" : "en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
               </div>
               <h1 className="blog-post__title animate-fade-up animate-delay-2" style={{ color: "var(--color-off-white)", fontSize: "clamp(2.5rem, 5vw, 4rem)", marginBottom: "1.5rem", lineHeight: 1.1, fontFamily: "var(--font-serif)" }}>{post.title}</h1>
-              <p className="blog-post__author animate-fade-up animate-delay-3" style={{ fontSize: "0.9375rem", color: "rgba(245, 243, 239, 0.6)" }}>By {post.author} &bull; {post.readTime}</p>
+              <p className="blog-post__author animate-fade-up animate-delay-3" style={{ fontSize: "0.9375rem", color: "rgba(245, 243, 239, 0.6)" }}>
+                {t("by", { author: post.author })} &bull; {post.readTime}
+              </p>
             </div>
           </div>
         </header>
 
-        {/* Content */}
         <div className="container">
           <div className="blog-post__body" style={{ maxWidth: "760px", margin: "0 auto", paddingBlock: "5rem" }}>
             <div
@@ -64,12 +70,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </div>
       </article>
 
-      {/* Related Posts */}
       {recentBlogs.length > 0 && (
         <section className="section" style={{ background: "var(--color-off-white)" }}>
           <div className="container">
             <h2 className="section-title" style={{ textAlign: "center", marginBottom: "3rem" }}>
-              Keep Reading
+              {t("keepReading")}
             </h2>
             <div className="blog-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem", maxWidth: "800px", margin: "0 auto" }}>
               {recentBlogs.map((relatedPost) => (
@@ -89,7 +94,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                       {relatedPost.title}
                     </h3>
                     <div className="blog-card__link" style={{ fontFamily: "var(--font-sans)", fontSize: "0.75rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-navy)", fontWeight: 500, display: "inline-flex", alignItems: "center", marginTop: "auto" }}>
-                      Read article &rarr;
+                      {t("readArticle")}
                     </div>
                   </div>
                 </Link>

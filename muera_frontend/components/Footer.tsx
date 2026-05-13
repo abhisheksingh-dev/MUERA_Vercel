@@ -1,16 +1,25 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 const FOOTER_LINKS = [
-  { label: "Shop", href: "/shop" },
-  { label: "Journal", href: "/blog" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-  { label: "Configurator", href: "/configurator" },
-  { label: "Privacy", href: "/privacy" },
-  { label: "Style Guide", href: "/style-guide" },
+  { labelKey: "shop", ns: "nav" as const, href: "/shop" },
+  { labelKey: "journal", ns: "nav" as const, href: "/blog" },
+  { labelKey: "about", ns: "nav" as const, href: "/about" },
+  { labelKey: "contact", ns: "nav" as const, href: "/contact" },
+  { labelKey: "configurator", ns: "nav" as const, href: "/configurator" },
+  { labelKey: "privacy", ns: "footer" as const, href: "/privacy" },
+  { labelKey: "styleGuide", ns: "footer" as const, href: "/style-guide" },
 ];
 
-export default function Footer() {
+export default async function Footer() {
+  const t = await getTranslations("footer");
+  const navT = await getTranslations("nav");
+
+  const links = FOOTER_LINKS.map((link) => ({
+    label: link.ns === "nav" ? navT(link.labelKey) : t(link.labelKey),
+    href: link.href,
+  }));
+
   return (
     <footer className="footer">
       <div className="container">
@@ -19,9 +28,9 @@ export default function Footer() {
             MUERA
           </Link>
 
-          <nav aria-label="Footer navigation">
+          <nav aria-label={t("footerNav")}>
             <ul className="footer__links" role="list">
-              {FOOTER_LINKS.map(({ label, href }) => (
+              {links.map(({ label, href }) => (
                 <li key={href}>
                   <Link href={href} className="footer__link">
                     {label}
@@ -32,7 +41,7 @@ export default function Footer() {
           </nav>
 
           <p className="footer__copy">
-            crafted in Switzerland &nbsp;·&nbsp; © {new Date().getFullYear()} MUERA
+            {t("copyright", { year: new Date().getFullYear() })}
           </p>
         </div>
       </div>

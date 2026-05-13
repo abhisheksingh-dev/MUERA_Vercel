@@ -1,19 +1,27 @@
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 import { BLOGS } from "@/data/blogs";
 
-export default function BlogPage() {
+export default async function BlogPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "blog" });
+
   return (
     <>
-      <section className="shop-hero" aria-label="MUERA Journal">
+      <section className="shop-hero" aria-label={t("heroTitle")}>
         <div className="container">
-          <p className="section-label" style={{ color: "var(--color-gold)" }}>Journal</p>
+          <p className="section-label" style={{ color: "var(--color-gold)" }}>{t("heroLabel")}</p>
           <h1 className="section-title section-title--light" style={{ maxWidth: 560 }}>
-            Stories & Craft
+            {t("heroTitle")}
           </h1>
           <div className="divider" style={{ background: "rgba(245,243,239,0.2)" }} />
           <p style={{ color: "rgba(245,243,239,0.6)", maxWidth: 480, fontSize: "1.0625rem" }}>
-            Explore our thoughts on made-to-measure tailoring, styling advice, and the philosophy behind MUERA.
+            {t("heroText")}
           </p>
         </div>
       </section>
@@ -22,7 +30,7 @@ export default function BlogPage() {
         <div className="container">
           <div className="blog-grid" aria-label="Blog posts" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
             {BLOGS.map((post) => (
-              <Link href={`/blog/${post.slug}`} key={post.id} className="blog-card" aria-label={`Read ${post.title}`} style={{ background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              <Link href={`/blog/${post.slug}`} key={post.id} className="blog-card" aria-label={post.title} style={{ background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }}>
                 <div className="blog-card__img-wrap" style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden", display: "block" }}>
                   <Image
                     src={post.image}
@@ -37,7 +45,7 @@ export default function BlogPage() {
                 </div>
                 <div className="blog-card__body" style={{ padding: "2.5rem", display: "flex", flexDirection: "column", flexGrow: 1 }}>
                   <div className="blog-card__meta" style={{ fontSize: "0.75rem", color: "var(--color-mid-gray)", textTransform: "uppercase", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-                    <span>{new Date(post.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+                    <span>{new Date(post.date).toLocaleDateString(locale === "de" ? "de-CH" : locale === "fr" ? "fr-CH" : locale === "it" ? "it-CH" : "en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
                     <span>&bull;</span>
                     <span>{post.readTime}</span>
                   </div>
@@ -46,7 +54,7 @@ export default function BlogPage() {
                   </h2>
                   <p className="blog-card__excerpt" style={{ fontSize: "0.9375rem", color: "var(--color-mid-gray)", marginBottom: "2rem", lineHeight: 1.6, flexGrow: 1 }}>{post.excerpt}</p>
                   <div className="blog-card__link" style={{ fontFamily: "var(--font-sans)", fontSize: "0.75rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-navy)", fontWeight: 500, display: "inline-flex", alignItems: "center" }}>
-                    Read article &rarr;
+                    {t("readArticle")}
                   </div>
                 </div>
               </Link>

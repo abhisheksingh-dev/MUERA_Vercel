@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { loadStripe } from "@stripe/stripe-js";
@@ -15,6 +16,8 @@ type PaymentMethod = "card" | "twint" | "invoice";
 function CheckoutContent() {
   const { items, subtotal, clearCart } = useCart();
   const router = useRouter();
+  const t = useTranslations("checkout");
+  const ct = useTranslations("common");
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [submitting, setSubmitting] = useState(false);
@@ -54,10 +57,9 @@ function CheckoutContent() {
           setSubmitting(false);
           return;
         }
-        
+
         console.log("Payment successful, method ID:", stripePaymentMethod.id);
-        
-        // Save order to backend
+
         try {
           await fetch('/api/orders', {
             method: 'POST',
@@ -84,8 +86,7 @@ function CheckoutContent() {
       }
     } else {
       await new Promise((r) => setTimeout(r, 1800));
-      
-      // Save order to backend
+
       try {
         await fetch('/api/orders', {
           method: 'POST',
@@ -114,70 +115,66 @@ function CheckoutContent() {
     router.push("/checkout/confirmation");
   };
 
-  if (items.length === 0) return null; // useEffect will redirect
+  if (items.length === 0) return null;
 
   return (
     <div className="container">
       <div className="checkout-layout">
-        {/* ── Form ─────────────────────────────────────────── */}
-        <form onSubmit={handleSubmit} noValidate aria-label="Checkout form">
+        <form onSubmit={handleSubmit} noValidate aria-label={t("title")}>
           <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(1.5rem, 2.5vw, 2rem)", marginBottom: "2.5rem" }}>
-            Checkout
+            {t("title")}
           </h1>
 
-          {/* Contact */}
           <div className="checkout-section">
-            <h2 className="checkout-section__title">Contact</h2>
+            <h2 className="checkout-section__title">{t("contact")}</h2>
             <div className="form-group">
-              <label htmlFor="co-email" className="form-label">Email address</label>
+              <label htmlFor="co-email" className="form-label">{t("emailAddress")}</label>
               <input type="email" id="co-email" name="email" className="form-input" placeholder="your@email.com" required autoComplete="email" />
             </div>
           </div>
 
-          {/* Shipping */}
           <div className="checkout-section">
-            <h2 className="checkout-section__title">Shipping Address</h2>
+            <h2 className="checkout-section__title">{t("shippingAddress")}</h2>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="co-first-name" className="form-label">First name</label>
+                <label htmlFor="co-first-name" className="form-label">{t("firstName")}</label>
                 <input type="text" id="co-first-name" name="firstName" className="form-input" placeholder="Max" required autoComplete="given-name" />
               </div>
               <div className="form-group">
-                <label htmlFor="co-last-name" className="form-label">Last name</label>
+                <label htmlFor="co-last-name" className="form-label">{t("lastName")}</label>
                 <input type="text" id="co-last-name" name="lastName" className="form-input" placeholder="Müller" required autoComplete="family-name" />
               </div>
             </div>
             <div className="form-group" style={{ marginTop: "1rem" }}>
-              <label htmlFor="co-address" className="form-label">Address</label>
+              <label htmlFor="co-address" className="form-label">{t("address")}</label>
               <input type="text" id="co-address" name="address" className="form-input" placeholder="Bahnhofstrasse 1" required autoComplete="street-address" />
             </div>
             <div className="form-row" style={{ marginTop: "1rem" }}>
               <div className="form-group">
-                <label htmlFor="co-postal" className="form-label">Postal code</label>
+                <label htmlFor="co-postal" className="form-label">{t("postalCode")}</label>
                 <input type="text" id="co-postal" name="postal" className="form-input" placeholder="8001" required autoComplete="postal-code" />
               </div>
               <div className="form-group">
-                <label htmlFor="co-city" className="form-label">City</label>
+                <label htmlFor="co-city" className="form-label">{t("city")}</label>
                 <input type="text" id="co-city" name="city" className="form-input" placeholder="Zürich" required autoComplete="address-level2" />
               </div>
             </div>
             <div className="form-group" style={{ marginTop: "1rem" }}>
-              <label htmlFor="co-country" className="form-label">Country</label>
+              <label htmlFor="co-country" className="form-label">{t("country")}</label>
               <select id="co-country" name="country" className="form-input" required autoComplete="country" defaultValue="CH">
-                <option value="CH">Switzerland</option>
-                <option value="DE">Germany</option>
-                <option value="AT">Austria</option>
-                <option value="FR">France</option>
-                <option value="IT">Italy</option>
-                <option value="GB">United Kingdom</option>
+                <option value="CH">{t("countries.CH")}</option>
+                <option value="DE">{t("countries.DE")}</option>
+                <option value="AT">{t("countries.AT")}</option>
+                <option value="FR">{t("countries.FR")}</option>
+                <option value="IT">{t("countries.IT")}</option>
+                <option value="GB">{t("countries.GB")}</option>
               </select>
             </div>
           </div>
 
-          {/* Payment */}
           <div className="checkout-section">
-            <h2 className="checkout-section__title">Payment</h2>
-            <div className="payment-methods" role="group" aria-label="Payment method">
+            <h2 className="checkout-section__title">{t("payment")}</h2>
+            <div className="payment-methods" role="group" aria-label={t("payment")}>
               {(["card", "twint", "invoice"] as PaymentMethod[]).map((m) => (
                 <button
                   key={m}
@@ -187,7 +184,7 @@ function CheckoutContent() {
                   id={`payment-${m}`}
                   aria-pressed={paymentMethod === m}
                 >
-                  {m === "card" ? "Credit Card" : m === "twint" ? "TWINT" : "Invoice"}
+                  {m === "card" ? t("creditCard") : m === "twint" ? t("twint") : t("invoice")}
                 </button>
               ))}
             </div>
@@ -195,7 +192,7 @@ function CheckoutContent() {
             {paymentMethod === "card" && (
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <div className="form-group">
-                  <label htmlFor="co-card-name" className="form-label">Name on card</label>
+                  <label htmlFor="co-card-name" className="form-label">{t("nameOnCard")}</label>
                   <input type="text" id="co-card-name" className="stripe-input" placeholder="Max Müller" required autoComplete="cc-name" />
                 </div>
                 <div className="form-group" style={{ padding: "12px", border: "1px solid var(--color-light-gray)", backgroundColor: "#fafafa" }}>
@@ -222,7 +219,7 @@ function CheckoutContent() {
                     <rect x="2" y="5" width="10" height="7" rx="1" />
                     <path d="M4 5V4a3 3 0 016 0v1" />
                   </svg>
-                  <span style={{ fontSize: "0.75rem", color: "var(--color-mid-gray)" }}>Secured by Stripe. We never store your card details.</span>
+                  <span style={{ fontSize: "0.75rem", color: "var(--color-mid-gray)" }}>{t("securedByStripe")}</span>
                 </div>
               </div>
             )}
@@ -230,7 +227,7 @@ function CheckoutContent() {
             {paymentMethod === "twint" && (
               <div style={{ padding: "2rem", border: "1px solid var(--color-light-gray)", textAlign: "center" }}>
                 <p style={{ color: "var(--color-mid-gray)", fontSize: "0.9375rem" }}>
-                  You will be redirected to TWINT after clicking Place Order.
+                  {t("twintRedirect")}
                 </p>
               </div>
             )}
@@ -238,13 +235,12 @@ function CheckoutContent() {
             {paymentMethod === "invoice" && (
               <div style={{ padding: "2rem", border: "1px solid var(--color-light-gray)" }}>
                 <p style={{ color: "var(--color-mid-gray)", fontSize: "0.9375rem" }}>
-                  Payment by invoice is available for orders under CHF 3,000. An invoice will be sent to your email within 24 hours of order confirmation. Payment due within 30 days.
+                  {t("invoiceText")}
                 </p>
               </div>
             )}
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             className="btn btn--primary"
@@ -252,20 +248,19 @@ function CheckoutContent() {
             disabled={submitting}
             style={{ width: "100%", justifyContent: "center", opacity: submitting ? 0.7 : 1 }}
           >
-            {submitting ? "Processing…" : `Place Order — ${formatPrice(total)}`}
+            {submitting ? t("processing") : t("placeOrder", { total: formatPrice(total) })}
           </button>
 
           <p style={{ fontSize: "0.75rem", color: "var(--color-mid-gray)", marginTop: "1rem", textAlign: "center" }}>
-            By placing your order you agree to our{" "}
-            <a href="/privacy" style={{ color: "var(--color-black)" }}>Privacy Policy</a>{" "}
-            and{" "}
-            <a href="/style-guide" style={{ color: "var(--color-black)" }}>Terms of Service</a>.
+            {t.rich("agreement", {
+              privacyPolicy: (chunks) => <a href="/privacy" style={{ color: "var(--color-black)" }} key="pp">{chunks}</a>,
+              termsOfService: (chunks) => <a href="/style-guide" style={{ color: "var(--color-black)" }} key="tos">{chunks}</a>,
+            })}
           </p>
         </form>
 
-        {/* ── Order Summary ─────────────────────────────── */}
-        <aside className="checkout-order-summary" aria-label="Order summary">
-          <h2 className="checkout-order-summary__title">Your Order</h2>
+        <aside className="checkout-order-summary" aria-label={t("yourOrder")}>
+          <h2 className="checkout-order-summary__title">{t("yourOrder")}</h2>
 
           {items.map((item) => (
             <div key={item.lineKey} className="checkout-summary-item">
@@ -301,15 +296,15 @@ function CheckoutContent() {
 
           <div className="checkout-totals">
             <div className="checkout-total-row">
-              <span>Subtotal</span>
+              <span>{t("subtotal")}</span>
               <span>{formatPrice(subtotal)}</span>
             </div>
             <div className="checkout-total-row">
-              <span>Shipping</span>
-              <span>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
+              <span>{t("shipping")}</span>
+              <span>{shipping === 0 ? t("free") : formatPrice(shipping)}</span>
             </div>
             <div className="checkout-total-row checkout-total-row--grand">
-              <span>Total</span>
+              <span>{t("total")}</span>
               <span>{formatPrice(total)}</span>
             </div>
           </div>
